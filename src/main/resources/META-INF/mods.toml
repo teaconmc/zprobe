@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "[45,)"
+license = "MIT"
+[[mods]]
+modId = "zprobe"
+version = "${file.jarVersion}"
+displayName = "ZProbe"
+description = '''
+Probe and signal handler for servers running inside K8s clusters.
+'''
+
+[[dependencies.zprobe]]
+modId = "forge"
+mandatory = true
+versionRange = "[45,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.zprobe]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19.4,1.20)"
+ordering = "NONE"
+side = "BOTH"
