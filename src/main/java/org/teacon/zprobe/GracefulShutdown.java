@@ -22,20 +22,24 @@ public final class GracefulShutdown implements Runnable {
 
     @Override
     public void run() {
-        server.sendSystemMessage(Component.literal(String.format("The server is scheduled for terminate in %d seconds", GRACEFUL_PERIOD)));
-        for (int i = GRACEFUL_PERIOD; i > 0; --i) {
-            if (i == GRACEFUL_PERIOD / 2 || i <= 10) {
-                server.sendSystemMessage(Component.literal(String.format("The server will be terminated in %d seconds", i)));
-            }
+        if (ZProbe.minecraftServer != null) {
+            server.sendSystemMessage(Component.literal(String.format("The server is scheduled for terminate in %d seconds", GRACEFUL_PERIOD)));
+            for (int i = GRACEFUL_PERIOD; i > 0; --i) {
+                if (ZProbe.minecraftServer.getPlayerCount() == 0) break;
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                if (i == GRACEFUL_PERIOD / 2 || i <= 10) {
+                    server.sendSystemMessage(Component.literal(String.format("The server will be terminated in %d seconds", i)));
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            server.halt(true);
         }
 
-        server.halt(true);
         org.apache.logging.log4j.LogManager.shutdown();
     }
 }
