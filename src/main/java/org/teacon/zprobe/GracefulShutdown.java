@@ -1,10 +1,13 @@
 package org.teacon.zprobe;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import org.slf4j.Logger;
 
 public final class GracefulShutdown implements Runnable {
     public static final int GRACEFUL_PERIOD;
+    private static final Logger logger = LogUtils.getLogger();
 
     static {
         if (System.getenv().containsKey("ZPROBE_GRACEFUL_PERIOD")) {
@@ -23,12 +26,12 @@ public final class GracefulShutdown implements Runnable {
     @Override
     public void run() {
         if (ZProbe.minecraftServer != null) {
-            server.sendSystemMessage(Component.literal(String.format("The server is scheduled for terminate in %d seconds", GRACEFUL_PERIOD)));
+            server.getPlayerList().broadcastSystemMessage(Component.literal(String.format("The server is scheduled for terminate in %d seconds", GRACEFUL_PERIOD)), true);
             for (int i = GRACEFUL_PERIOD; i > 0; --i) {
                 if (ZProbe.minecraftServer.getPlayerCount() == 0) break;
 
                 if (i == GRACEFUL_PERIOD / 2 || i <= 10) {
-                    server.sendSystemMessage(Component.literal(String.format("The server will be terminated in %d seconds", i)));
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(String.format("The server will be terminated in %d seconds", i)), true);
                 }
 
                 try {
@@ -37,6 +40,8 @@ public final class GracefulShutdown implements Runnable {
                     throw new RuntimeException(e);
                 }
             }
+            ZProbe.shouldTerminate = true;
+            logger.info("Halting the server");
             server.halt(true);
         }
 

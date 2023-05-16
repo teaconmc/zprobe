@@ -17,7 +17,7 @@ final class ZProbeHttpServer {
     private static final HttpServer httpServer;
     private static final int LISTEN_PORT;
     private static volatile boolean serverHealthy = true;
-    private static volatile int lastTick = 0;
+    private static volatile int lastTick = -1;
 
     static {
         if (System.getenv().containsKey("ZPROBE_LISTEN_PORT")) {
@@ -39,7 +39,7 @@ final class ZProbeHttpServer {
                 logger.warn("Server isn't ticking for at least 5 seconds, status is set to unhealthy");
             }
             lastTick = ZProbe.minecraftServer.getTickCount();
-        }, 1, 5, TimeUnit.SECONDS);
+        }, 5, 5, TimeUnit.SECONDS);
 
         httpServer.createContext("/ready", exchange -> {
             exchange.sendResponseHeaders(ZProbe.minecraftServer != null ? 200 : 500, -1);
