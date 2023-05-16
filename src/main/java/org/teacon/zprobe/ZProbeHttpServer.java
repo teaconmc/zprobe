@@ -27,7 +27,7 @@ final class ZProbeHttpServer {
         }
 
         try {
-            httpServer = HttpServer.create(InetSocketAddress.createUnresolved("0.0.0.0", LISTEN_PORT), 0);
+            httpServer = HttpServer.create(new InetSocketAddress(LISTEN_PORT), 0);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -52,7 +52,7 @@ final class ZProbeHttpServer {
     }
 
     static void start() {
-        logger.info("Starting probe http server");
+        logger.info("Starting probe http server on port " + LISTEN_PORT);
         httpServer.start();
     }
 }
