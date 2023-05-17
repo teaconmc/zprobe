@@ -30,9 +30,6 @@ steps:
 
   - name: build-nightly
     image: openjdk:17-alpine
-    environment:
-      GITEA_TOKEN:
-        from_secret: gitea_token
     commands:
       - ./gradlew build --no-daemon
     volumes:
@@ -46,6 +43,9 @@ steps:
 
   - name: publish
     image: openjdk:17-alpine
+    environment:
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - ./gradlew publishReleasePublicationToTeaConGiteaRepository --no-daemon
     volumes:
