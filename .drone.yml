@@ -50,7 +50,7 @@ steps:
       path-style: true
       cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
       rebuild: true
-      override: true
+      override: false
       mount:
         - /root/.gradle
     volumes:
