@@ -3,7 +3,8 @@ type: docker
 name: publish
 
 trigger:
-  event: [ push ]
+  event: [ push, tag ]
+  ref: [ "refs/heads/master", "refs/tags/**" ]
 
 steps:
   - name: restore-gradle-cache
