@@ -132,7 +132,7 @@ publishing {
             artifact devJar
 
             pom {
-                name = 'ZProbe for Minecraft forge 1.19.4'
+                name = 'ZProbe Forge 1.19.4'
                 description = 'Probe and signal handler for servers running inside K8s clusters'
                 licenses {
                     license {
