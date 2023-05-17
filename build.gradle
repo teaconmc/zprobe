@@ -104,13 +104,38 @@ jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        release(MavenPublication) {
+            groupId = group
+            artifactId = archivesBaseName
+
             artifact jar
+
+            pom {
+                name = 'ZProbe for Minecraft forge 1.19.4'
+                description = 'Probe and signal handler for servers running inside K8s clusters'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://opensource.org/license/mit/'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'Seraph_JACK'
+                        name = 'Seraph_JACK'
+                    }
+                }
+            }
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            name = "teacon"
+            url = "s3://maven/"
+            credentials(AwsCredentials) {
+                accessKey = System.env.TEACON_ARCHIVE_ACCESS_KEY
+                secretKey = System.env.TEACON_ARCHIVE_ACCESS_SECRET
+            }
         }
     }
 }
