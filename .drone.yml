@@ -1,0 +1,64 @@
+kind: pipeline
+type: docker
+name: publish
+
+trigger:
+  event: [ push ]
+
+steps:
+  - name: restore-gradle-cache
+    image: meltwater/drone-cache
+    pull: if-not-exists
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: oss_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: oss_key_secret
+    settings:
+      bucket: teacon-drone-cache
+      region: cn-hangzhou
+      endpoint: oss-cn-hangzhou.aliyuncs.com
+      path-style: true
+      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
+      restore: true
+      mount:
+        - /root/.gradle
+    volumes:
+      - name: gradle-cache
+        path: /root/.gradle
+  - name: build-nightly
+    image: openjdk:17-alpine
+    commands:
+      - ./gradlew build --no-daemon
+    volumes:
+      - name: gradle-cache
+        path: /root/.gradle
+    depends_on:
+      - restore-gradle-cache
+  - name: rebuild-gradle-cache
+    image: meltwater/drone-cache
+    pull: if-not-exists
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: oss_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: oss_key_secret
+    settings:
+      bucket: teacon-drone-cache
+      region: cn-hangzhou
+      endpoint: oss-cn-hangzhou.aliyuncs.com
+      path-style: true
+      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
+      rebuild: true
+      override: true
+      mount:
+        - /root/.gradle
+    volumes:
+      - name: gradle-cache
+        path: /root/.gradle
+    depends_on:
+      - build-nightly
+
+volumes:
+  - name: gradle-cache
+    temp: { }
