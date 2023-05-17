@@ -26,8 +26,12 @@ steps:
     volumes:
       - name: gradle-cache
         path: /root/.gradle
+
   - name: build-nightly
     image: openjdk:17-alpine
+    environment:
+      GITEA_TOKEN:
+        from_secret: gitea_token
     commands:
       - ./gradlew build --no-daemon
     volumes:
@@ -35,6 +39,20 @@ steps:
         path: /root/.gradle
     depends_on:
       - restore-gradle-cache
+
+  - name: publish
+    image: openjdk:17-alpine
+    commands:
+      - ./gradlew publishReleasePublicationToTeaConGiteaRepository --no-daemon
+    volumes:
+      - name: gradle-cache
+        path: /root/.gradle
+    depends_on:
+      - restore-gradle-cache
+    when:
+      ref:
+        - refs/tags/**
+
   - name: rebuild-gradle-cache
     image: meltwater/drone-cache
     pull: if-not-exists
