@@ -98,18 +98,36 @@ jar {
     }
 }
 
+tasks.register('devJar', Jar) {
+    archiveClassifier = "dev"
+    dependsOn classes
+    from {
+        sourceSets.main.output
+    }
+}
+
+tasks.register('srcJar', Jar) {
+    archiveClassifier = "src"
+    from {
+        sourceSets.main.allSource
+    }
+}
+
 jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 // publish.dependsOn('reobfJar')
 
+artifacts {
+    archives devJar
+    archives srcJar
+}
+
 publishing {
     publications {
         release(MavenPublication) {
-            groupId = group
-            artifactId = archivesBaseName
-
             artifact jar
-
+            artifact srcJar
+            artifact devJar
             pom {
                 name = 'ZProbe for Minecraft forge 1.19.4'
                 description = 'Probe and signal handler for servers running inside K8s clusters'
