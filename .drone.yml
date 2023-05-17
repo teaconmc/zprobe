@@ -40,6 +40,9 @@ steps:
         path: /root/.gradle
     depends_on:
       - restore-gradle-cache
+    when:
+      ref:
+        exclude: [ "refs/tags/**" ]
 
   - name: publish
     image: openjdk:17-alpine
@@ -77,6 +80,7 @@ steps:
         path: /root/.gradle
     depends_on:
       - build-nightly
+      - publish
 
 volumes:
   - name: gradle-cache
