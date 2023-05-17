@@ -87,7 +87,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "zprobe",
+                "Specification-Title"     : "ZProbe-Forge-1.19.4",
                 "Specification-Vendor"    : "TeaConMC",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
@@ -125,9 +125,12 @@ artifacts {
 publishing {
     publications {
         release(MavenPublication) {
+            artifactId = archivesBaseName
+
             artifact jar
             artifact srcJar
             artifact devJar
+
             pom {
                 name = 'ZProbe for Minecraft forge 1.19.4'
                 description = 'Probe and signal handler for servers running inside K8s clusters'
@@ -148,11 +151,24 @@ publishing {
     }
     repositories {
         maven {
-            name = "teacon"
+            name = "TeaConOSS"
             url = "s3://maven/"
             credentials(AwsCredentials) {
                 accessKey = System.env.TEACON_ARCHIVE_ACCESS_KEY
                 secretKey = System.env.TEACON_ARCHIVE_ACCESS_SECRET
+            }
+        }
+        maven {
+            name = "TeaConGitea"
+            url = "https://git.teacon.cn/api/packages/teaconmc/maven"
+
+            credentials(HttpHeaderCredentials) {
+                name = "Authorization"
+                value = "token " + System.getenv("GITEA_TOKEN")
+            }
+
+            authentication {
+                header(HttpHeaderAuthentication)
             }
         }
     }
