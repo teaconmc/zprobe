@@ -1,5 +1,7 @@
 # zprobe
 
+[![Build Status](https://ci.teacon.cn/api/badges/teaconmc/zprobe/status.svg)](https://ci.teacon.cn/teaconmc/zprobe)
+
 Probe and signal handler for servers running inside K8s clusters.
 
 ## Features

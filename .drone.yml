@@ -29,7 +29,7 @@ steps:
         path: /root/.gradle
 
   - name: build-nightly
-    image: openjdk:17-alpine
+    image: azul/zulu-openjdk-alpine:17
     commands:
       - ./gradlew build --no-daemon
     volumes:
@@ -42,7 +42,7 @@ steps:
         exclude: [ "refs/tags/**" ]
 
   - name: publish
-    image: openjdk:17-alpine
+    image: azul/zulu-openjdk-alpine:17
     environment:
       GITEA_TOKEN:
         from_secret: gitea_token
