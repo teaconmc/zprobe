@@ -51,8 +51,8 @@ steps:
       TEACON_ARCHIVE_ACCESS_SECRET:
         from_secret: archive_access_secret
     commands:
-      - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-cn-shanghai.aliyuncs.com\
-        publishReleasePublicationToTeaConOSSRepository \
+      - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-cn-shanghai.aliyuncs.com
+        publishReleasePublicationToTeaConOSSRepository 
         publishReleasePublicationToTeaConGiteaRepository  --no-daemon
     volumes:
       - name: gradle-cache
