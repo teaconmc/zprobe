@@ -12,11 +12,8 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.NetworkConstants;
 import org.slf4j.Logger;
-
-import java.lang.reflect.Field;
 
 @Mod(ZProbe.ID)
 @Mod.EventBusSubscriber(modid = ZProbe.ID, value = Dist.DEDICATED_SERVER)
@@ -50,21 +47,11 @@ public final class ZProbe {
                 "ZProbe Server Shutdown Thread"));
     }
 
-    static final Field RUNNING_FIELD = ObfuscationReflectionHelper.findField(MinecraftServer.class, "f_129764_");
-
-    static {
-        RUNNING_FIELD.setAccessible(true);
-    }
-
     @SubscribeEvent
     public static void tickEnd(TickEvent event) {
         if (event.phase == TickEvent.Phase.END && minecraftServer != null && !shouldTerminate) {
             minecraftServer.execute(() -> {
-                try {
-                    RUNNING_FIELD.set(minecraftServer, true);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                minecraftServer.running = true;
             });
         }
     }
