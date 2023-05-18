@@ -46,8 +46,14 @@ steps:
     environment:
       GITEA_TOKEN:
         from_secret: gitea_token
+      TEACON_ARCHIVE_ACCESS_KEY:
+        from_secret: archive_access_key
+      TEACON_ARCHIVE_ACCESS_SECRET:
+        from_secret: archive_access_secret
     commands:
-      - ./gradlew publishReleasePublicationToTeaConGiteaRepository --no-daemon
+      - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-cn-shanghai.aliyuncs.com\
+        publishReleasePublicationToTeaConOSSRepository \
+        publishReleasePublicationToTeaConGiteaRepository  --no-daemon
     volumes:
       - name: gradle-cache
         path: /root/.gradle
