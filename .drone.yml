@@ -20,7 +20,7 @@ steps:
       region: cn-hangzhou
       endpoint: oss-cn-hangzhou.aliyuncs.com
       path-style: true
-      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
+      cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       restore: true
       mount:
         - /root/.gradle
@@ -52,7 +52,7 @@ steps:
         from_secret: archive_access_secret
     commands:
       - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-cn-shanghai.aliyuncs.com
-        publishReleasePublicationToTeaConOSSRepository 
+        publishReleasePublicationToTeaConOSSRepository
         publishReleasePublicationToTeaConGiteaRepository  --no-daemon
     volumes:
       - name: gradle-cache
@@ -76,7 +76,7 @@ steps:
       region: cn-hangzhou
       endpoint: oss-cn-hangzhou.aliyuncs.com
       path-style: true
-      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
+      cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       rebuild: true
       override: false
       mount:
