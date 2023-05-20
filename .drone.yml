@@ -18,7 +18,7 @@ steps:
     settings:
       bucket: teacon-drone-cache
       region: cn-hangzhou
-      endpoint: oss-cn-hangzhou.aliyuncs.com
+      endpoint: teacon-drone-cache.oss-accelerate.aliyuncs.com
       path-style: true
       cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       restore: true
@@ -74,7 +74,7 @@ steps:
     settings:
       bucket: teacon-drone-cache
       region: cn-hangzhou
-      endpoint: oss-cn-hangzhou.aliyuncs.com
+      endpoint: teacon-drone-cache.oss-accelerate.aliyuncs.com
       path-style: true
       cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       rebuild: true
