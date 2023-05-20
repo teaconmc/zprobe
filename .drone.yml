@@ -91,3 +91,6 @@ steps:
 volumes:
   - name: gradle-cache
     temp: { }
+
+node:
+  mainland: "false"
