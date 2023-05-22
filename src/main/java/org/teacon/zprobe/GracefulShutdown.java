@@ -11,7 +11,7 @@ public final class GracefulShutdown implements Runnable {
 
     static {
         if (System.getenv().containsKey("ZPROBE_GRACEFUL_PERIOD")) {
-            GRACEFUL_PERIOD = Integer.parseInt("ZPROBE_GRACEFUL_PERIOD");
+            GRACEFUL_PERIOD = Integer.parseInt(System.getenv("ZPROBE_GRACEFUL_PERIOD"));
         } else {
             GRACEFUL_PERIOD = 30;
         }
