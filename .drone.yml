@@ -3,27 +3,20 @@ type: docker
 name: publish
 
 trigger:
-  event: [ push, tag ]
-  ref: [ "refs/heads/master", "refs/tags/**" ]
+  event: [push, tag]
+  ref: ["refs/heads/master", "refs/tags/**"]
 
 steps:
   - name: restore-gradle-cache
-    image: meltwater/drone-cache
+    image: drillster/drone-volume-cache
     pull: if-not-exists
-    environment:
-      AWS_ACCESS_KEY_ID:
-        from_secret: oss_key_id
-      AWS_SECRET_ACCESS_KEY:
-        from_secret: oss_key_secret
     settings:
-      bucket: teacon-drone-cache
-      region: cn-hangzhou
-      endpoint: teacon-drone-cache.oss-accelerate.aliyuncs.com
-      cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       restore: true
       mount:
         - /root/.gradle
     volumes:
+      - name: cache
+        path: /cache
       - name: gradle-cache
         path: /root/.gradle
 
@@ -38,7 +31,7 @@ steps:
       - restore-gradle-cache
     when:
       ref:
-        exclude: [ "refs/tags/**" ]
+        exclude: ["refs/tags/**"]
 
   - name: publish
     image: azul/zulu-openjdk-alpine:17
@@ -50,7 +43,7 @@ steps:
       TEACON_ARCHIVE_ACCESS_SECRET:
         from_secret: archive_access_secret
     commands:
-      - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-cn-shanghai.aliyuncs.com
+      - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-accelerate.aliyuncs.com
         publishReleasePublicationToTeaConOSSRepository
         publishReleasePublicationToTeaConGiteaRepository  --no-daemon
     volumes:
@@ -63,23 +56,15 @@ steps:
         - refs/tags/**
 
   - name: rebuild-gradle-cache
-    image: meltwater/drone-cache
+    image: drillster/drone-volume-cache
     pull: if-not-exists
-    environment:
-      AWS_ACCESS_KEY_ID:
-        from_secret: oss_key_id
-      AWS_SECRET_ACCESS_KEY:
-        from_secret: oss_key_secret
     settings:
-      bucket: teacon-drone-cache
-      region: cn-hangzhou
-      endpoint: teacon-drone-cache.oss-accelerate.aliyuncs.com
-      cache_key: "{{ .Commit.Branch }}-{{ checksum \"src/resources/META-INF/accesstransformer.cfg\" }}-gradle-cache-nightly"
       rebuild: true
-      override: false
       mount:
         - /root/.gradle
     volumes:
+      - name: cache
+        path: /cache
       - name: gradle-cache
         path: /root/.gradle
     depends_on:
@@ -87,8 +72,11 @@ steps:
       - publish
 
 volumes:
+  - name: cache
+    host:
+      path: /var/lib/drone-runner/cache
   - name: gradle-cache
-    temp: { }
+    temp: {}
 
 node:
   mainland: "false"
