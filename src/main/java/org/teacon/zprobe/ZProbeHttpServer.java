@@ -42,11 +42,11 @@ final class ZProbeHttpServer {
         }, 5, 5, TimeUnit.SECONDS);
 
         httpServer.createContext("/ready", exchange -> {
-            exchange.sendResponseHeaders(ZProbe.minecraftServer != null ? 200 : 500, -1);
+            exchange.sendResponseHeaders(ZProbe.minecraftServer != null ? 204 : 500, -1);
             exchange.close();
         });
         httpServer.createContext("/live", exchange -> {
-            exchange.sendResponseHeaders(serverHealthy ? 200 : 500, -1);
+            exchange.sendResponseHeaders(serverHealthy ? 204 : 500, -1);
             exchange.close();
         });
     }
