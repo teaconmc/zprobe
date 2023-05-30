@@ -6,19 +6,19 @@ Probe and signal handler for servers running inside K8s clusters.
 
 ## Features
 
-### Readiness probe
+### Startup probe
 
-A readiness probe is exposed at endpoint `GET /ready`.
+A startup probe is exposed at endpoint `GET /ready`.
 
-The response status code will be `200` if the forge server reached `ServerStartedEvent`, `500` otherwise.
-The response body is always empty.
+- The response status code will be `204` if the forge server reached `ServerStartedEvent`, `500` otherwise.
+- The response body is always empty.
 
 ### Liveness probe
 
 A liveness probe is exposed at endpoint `GET /live`.
 
-The response status code will be `200` if the server completed any ticks in last 5 seconds, `500` otherwise.
-The response body is always empty.
+- The response status code will be `204` if the server completed any ticks in last 5 seconds, `500` otherwise.
+- The response body is always empty.
 
 ### Graceful shutdown
 
