@@ -50,6 +50,7 @@ public final class ZProbe {
     @SubscribeEvent
     public static void tickEnd(TickEvent event) {
         if (event.phase == TickEvent.Phase.END && minecraftServer != null && !shouldTerminate) {
+            minecraftServer.running = true;
             minecraftServer.execute(() -> {
                 minecraftServer.running = true;
             });
