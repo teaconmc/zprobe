@@ -15,13 +15,15 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
 import org.slf4j.Logger;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
 @Mod(ZProbe.ID)
 @Mod.EventBusSubscriber(modid = ZProbe.ID, value = Dist.DEDICATED_SERVER)
 public final class ZProbe {
     public static final String ID = "zprobe";
     private static final Logger logger = LogUtils.getLogger();
-    static MinecraftServer minecraftServer = null;
-    static volatile boolean shouldTerminate = false;
+    static final CompletableFuture<MinecraftServer> minecraftServer = new CompletableFuture<>();
 
     public ZProbe() {
         logger.debug("ZProbe reached construction");
@@ -40,20 +42,6 @@ public final class ZProbe {
 
     @SubscribeEvent
     public static void serverStarted(ServerStartedEvent event) {
-        minecraftServer = event.getServer();
-
-        logger.info("Adding shutdown hook");
-        Runtime.getRuntime().addShutdownHook(new Thread(new GracefulShutdown(minecraftServer),
-                "ZProbe Server Shutdown Thread"));
-    }
-
-    @SubscribeEvent
-    public static void tickEnd(TickEvent event) {
-        if (event.phase == TickEvent.Phase.END && minecraftServer != null && !shouldTerminate) {
-            minecraftServer.running = true;
-            minecraftServer.execute(() -> {
-                minecraftServer.running = true;
-            });
-        }
+        minecraftServer.complete(event.getServer());
     }
 }

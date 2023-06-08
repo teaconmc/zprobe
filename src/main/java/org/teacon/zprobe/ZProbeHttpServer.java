@@ -2,13 +2,17 @@ package org.teacon.zprobe;
 
 import com.mojang.logging.LogUtils;
 import com.sun.net.httpserver.HttpServer;
+import net.minecraft.Util;
+import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class ZProbeHttpServer {
     private static final ScheduledExecutorService executor = Executors
@@ -33,26 +37,33 @@ final class ZProbeHttpServer {
         }
 
         executor.scheduleAtFixedRate(() -> {
-            if (ZProbe.minecraftServer == null) return;
-            serverHealthy = lastTick != ZProbe.minecraftServer.getTickCount();
+            var minecraftServer = ZProbe.minecraftServer.getNow(null);
+            if (minecraftServer == null) return;
+            serverHealthy = lastTick != minecraftServer.getTickCount();
             if (!serverHealthy) {
                 logger.warn("Server isn't ticking for at least 5 seconds, status is set to unhealthy");
             }
-            lastTick = ZProbe.minecraftServer.getTickCount();
+            lastTick = minecraftServer.getTickCount();
         }, 5, 5, TimeUnit.SECONDS);
 
         httpServer.createContext("/ready", exchange -> {
-            exchange.sendResponseHeaders(ZProbe.minecraftServer != null ? 204 : 500, -1);
+            exchange.sendResponseHeaders(ZProbe.minecraftServer.isDone() ? 204 : 500, -1);
             exchange.close();
         });
         httpServer.createContext("/live", exchange -> {
             exchange.sendResponseHeaders(serverHealthy ? 204 : 500, -1);
             exchange.close();
         });
+        httpServer.createContext("/stop", exchange -> {
+            exchange.sendResponseHeaders(200, 0);
+            new GracefulShutdown(ZProbe.minecraftServer, new OutputStreamWriter(exchange.getResponseBody())).run();
+            exchange.close();
+        });
     }
 
     static void start() {
         logger.info("Starting probe http server on port " + LISTEN_PORT);
+        httpServer.setExecutor(Util.ioPool());
         httpServer.start();
     }
 }
