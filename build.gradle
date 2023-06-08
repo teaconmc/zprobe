@@ -244,7 +244,7 @@ artifacts {
 publishing {
     publications {
         release(MavenPublication) {
-            artifactId = base.archivesName
+            artifactId = "${mod_name}-Forge-${minecraft_version.split("\\.")[0..1].join(".")}"
 
             artifact jar
             artifact srcJar
