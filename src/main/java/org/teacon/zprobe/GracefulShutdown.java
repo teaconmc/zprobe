@@ -4,16 +4,19 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public final class GracefulShutdown implements Runnable {
     public static final int GRACEFUL_PERIOD;
     private static final Logger logger = LogUtils.getLogger();
+    private static final Map<String, String> TEMPLATES;
 
     static {
         if (System.getenv().containsKey("ZPROBE_GRACEFUL_PERIOD")) {
@@ -21,6 +24,9 @@ public final class GracefulShutdown implements Runnable {
         } else {
             GRACEFUL_PERIOD = 30;
         }
+        TEMPLATES = Map.of(
+                "zh_cn", "服务器计划于 %d 秒后关闭",
+                "en_us", "The server is scheduled for termination in %d second(s)");
     }
 
     private final CompletableFuture<MinecraftServer> server;
@@ -33,29 +39,41 @@ public final class GracefulShutdown implements Runnable {
 
     @Override
     public void run() {
-        // noinspection resource
         var minecraftServer = this.server.join();
         if (minecraftServer != null) {
-            var broadcastMessage = String.format("The server is scheduled for terminate in %d seconds", GRACEFUL_PERIOD);
-            minecraftServer.getPlayerList().broadcastSystemMessage(Component.literal(broadcastMessage), true);
+            this.sendShutdownMessages(minecraftServer, GRACEFUL_PERIOD, false);
             for (int i = GRACEFUL_PERIOD - 1; i >= 0; --i) {
                 if (minecraftServer.getPlayerCount() == 0) break;
                 Uninterruptibles.sleepUninterruptibly(1000L, TimeUnit.MILLISECONDS);
-                broadcastMessage = String.format("The server will be terminated in %d seconds", i);
-                if (i == GRACEFUL_PERIOD / 2 || i <= 10) {
-                    minecraftServer.getPlayerList().broadcastSystemMessage(Component.literal(broadcastMessage), true);
+                if (i % 10 == 0 || i <= 10) {
+                    this.sendShutdownMessages(minecraftServer, i, false);
                 }
-                try {
-                    this.writer.write(broadcastMessage + "\r\n");
-                    this.writer.flush();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                this.sendShutdownMessages(minecraftServer, i, true);
             }
-            logger.info("Halting the server");
-            minecraftServer.halt(true);
+            minecraftServer.execute(() -> {
+                logger.info("Halting the server");
+                ZProbeHttpServer.stop();
+                minecraftServer.halt(false);
+            });
         }
 
         org.apache.logging.log4j.LogManager.shutdown();
+    }
+
+    private void sendShutdownMessages(MinecraftServer server, int terminationSecond, boolean overlay) {
+        var message = String.format(TEMPLATES.get("en_us"), terminationSecond);
+        if (!overlay) {
+            server.sendSystemMessage(Component.literal(message));
+            try {
+                this.writer.write(message + "\r\n");
+                this.writer.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        for (var player : server.getPlayerList().getPlayers()) {
+            message = String.format(TEMPLATES.getOrDefault(player.getLanguage(), TEMPLATES.get("en_us")), terminationSecond);
+            player.sendSystemMessage(Component.literal(message), overlay);
+        }
     }
 }

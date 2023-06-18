@@ -66,4 +66,8 @@ final class ZProbeHttpServer {
         httpServer.setExecutor(Util.ioPool());
         httpServer.start();
     }
+
+    static void stop() {
+        httpServer.stop(0);
+    }
 }
