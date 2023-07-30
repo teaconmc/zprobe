@@ -20,14 +20,21 @@ final class ZProbeHttpServer {
     private static final Logger logger = LogUtils.getLogger();
     private static final HttpServer httpServer;
     private static final int LISTEN_PORT;
+    private static final int MAX_TICK_PERIOD;
     private static volatile boolean serverHealthy = true;
-    private static volatile int lastTick = -1;
+    private static volatile long lastTick = -1;
 
     static {
         if (System.getenv().containsKey("ZPROBE_LISTEN_PORT")) {
             LISTEN_PORT = Integer.parseInt(System.getenv("ZPROBE_LISTEN_PORT"));
         } else {
             LISTEN_PORT = 35565;
+        }
+
+        if (System.getenv().containsKey("ZPROBE_MAX_TICK_PERIOD")) {
+            MAX_TICK_PERIOD = Integer.parseInt(System.getenv("ZPROBE_MAX_TICK_PERIOD"));
+        } else {
+            MAX_TICK_PERIOD = 5;
         }
 
         try {
@@ -39,12 +46,12 @@ final class ZProbeHttpServer {
         executor.scheduleAtFixedRate(() -> {
             var minecraftServer = ZProbe.minecraftServer.getNow(null);
             if (minecraftServer == null) return;
-            serverHealthy = lastTick != minecraftServer.getTickCount();
+            serverHealthy = lastTick != minecraftServer.getNextTickTime();
             if (!serverHealthy) {
                 logger.warn("Server isn't ticking for at least 5 seconds, status is set to unhealthy");
             }
-            lastTick = minecraftServer.getTickCount();
-        }, 5, 5, TimeUnit.SECONDS);
+            lastTick = minecraftServer.getNextTickTime();
+        }, MAX_TICK_PERIOD, MAX_TICK_PERIOD, TimeUnit.SECONDS);
 
         httpServer.createContext("/ready", exchange -> {
             exchange.sendResponseHeaders(ZProbe.minecraftServer.isDone() ? 204 : 500, -1);
