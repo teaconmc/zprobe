@@ -37,7 +37,7 @@ steps:
     image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
     pull: if-not-exists
     commands:
-      - ./gradlew build --info --no-daemon || cat build/tmp/neoformruntime/*_decompile/console_output.txt
+      - ./gradlew build --info --no-daemon
     volumes:
       - name: gradle-cache
         path: /root/.gradle
@@ -103,4 +103,4 @@ volumes:
     temp: {}
 
 node:
-  mainland: "false"
+  mainland: "true"
