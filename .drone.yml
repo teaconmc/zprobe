@@ -35,6 +35,7 @@ steps:
 
   - name: build-nightly
     image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
+    pull: if-not-exists
     commands:
       - ./gradlew build --no-daemon
     volumes:
@@ -50,6 +51,7 @@ steps:
 
   - name: publish
     image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
+    pull: if-not-exists
     environment:
       GITEA_TOKEN:
         from_secret: gitea_token
