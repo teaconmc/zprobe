@@ -103,4 +103,4 @@ volumes:
     temp: {}
 
 node:
-  mainland: "true"
+  mainland: "false"
