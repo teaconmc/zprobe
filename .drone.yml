@@ -37,7 +37,7 @@ steps:
     image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
     pull: if-not-exists
     commands:
-      - ./gradlew build --no-daemon
+      - ./gradlew build --debug --no-daemon
     volumes:
       - name: gradle-cache
         path: /root/.gradle
