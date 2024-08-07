@@ -3,7 +3,6 @@ package org.teacon.zprobe;
 import com.mojang.logging.LogUtils;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.Util;
-import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 final class ZProbeHttpServer {
     private static final ScheduledExecutorService executor = Executors

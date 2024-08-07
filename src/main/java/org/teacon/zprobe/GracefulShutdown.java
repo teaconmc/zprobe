@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 
 import java.io.IOException;

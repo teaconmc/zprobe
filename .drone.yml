@@ -7,21 +7,34 @@ trigger:
   ref: ["refs/heads/master", "refs/tags/**"]
 
 steps:
+
+  # Restore gradle cache (located at ~/.gradle/ directory)
+
   - name: restore-gradle-cache
-    image: drillster/drone-volume-cache
+    image: meltwater/drone-cache
     pull: if-not-exists
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: oss_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: oss_key_secret
     settings:
+      bucket: teacon-drone-cache
+      region: cn-hangzhou
+      endpoint: oss-cn-hangzhou.aliyuncs.com
+      path-style: true
+      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
       restore: true
       mount:
         - /root/.gradle
     volumes:
-      - name: cache
-        path: /cache
       - name: gradle-cache
         path: /root/.gradle
 
+  # Execute gradle build tasks
+
   - name: build-nightly
-    image: azul/zulu-openjdk-alpine:17
+    image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
     commands:
       - ./gradlew build --no-daemon
     volumes:
@@ -33,8 +46,10 @@ steps:
       ref:
         exclude: ["refs/tags/**"]
 
+  # Publish
+
   - name: publish
-    image: azul/zulu-openjdk-alpine:17
+    image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
     environment:
       GITEA_TOKEN:
         from_secret: gitea_token
@@ -44,8 +59,7 @@ steps:
         from_secret: archive_access_secret
     commands:
       - ./gradlew -Dorg.gradle.s3.endpoint=https://teacon2021.oss-accelerate.aliyuncs.com
-        publishReleasePublicationToTeaConOSSRepository
-        publishReleasePublicationToTeaConGiteaRepository  --no-daemon
+        publishReleasePublicationToTeaConOSSRepository publishReleasePublicationToTeaConGiteaRepository --no-daemon
     volumes:
       - name: gradle-cache
         path: /root/.gradle
@@ -55,16 +69,27 @@ steps:
       ref:
         - refs/tags/**
 
+  # Rebuild gradle cache (located at ~/.gradle/ directory)
+
   - name: rebuild-gradle-cache
-    image: drillster/drone-volume-cache
+    image: meltwater/drone-cache
     pull: if-not-exists
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: oss_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: oss_key_secret
     settings:
+      bucket: teacon-drone-cache
+      region: cn-hangzhou
+      endpoint: oss-cn-hangzhou.aliyuncs.com
+      path-style: true
+      cache_key: "{{ .Commit.Branch }}-gradle-cache-nightly"
       rebuild: true
+      override: true
       mount:
         - /root/.gradle
     volumes:
-      - name: cache
-        path: /cache
       - name: gradle-cache
         path: /root/.gradle
     depends_on:
@@ -72,11 +97,8 @@ steps:
       - publish
 
 volumes:
-  - name: cache
-    host:
-      path: /var/lib/drone-runner/cache
   - name: gradle-cache
     temp: {}
 
 node:
-  mainland: "false"
+  mainland: "true"

@@ -13,6 +13,9 @@ out
 *.iml
 .idea
 
+# vscode
+.vscode
+
 # gradle
 build
 .gradle
@@ -20,4 +23,7 @@ build
 # other
 eclipse
 run
+runs
+run-data
 
+repo
