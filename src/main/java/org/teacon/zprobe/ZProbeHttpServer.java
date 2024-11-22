@@ -2,19 +2,21 @@ package org.teacon.zprobe;
 
 import com.mojang.logging.LogUtils;
 import com.sun.net.httpserver.HttpServer;
-import net.minecraft.Util;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 final class ZProbeHttpServer {
-    private static final ScheduledExecutorService executor = Executors
-            .newSingleThreadScheduledExecutor(r -> new Thread(r, "ZProbe Executor Thread"));
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "ZProbe Executor Thread"));
     private static final Logger logger = LogUtils.getLogger();
     private static final HttpServer httpServer;
     private static final int LISTEN_PORT;
@@ -47,6 +49,9 @@ final class ZProbeHttpServer {
             serverHealthy = lastTick != minecraftServer.getNextTickTime();
             if (!serverHealthy) {
                 logger.warn("Server isn't ticking for at least 5 seconds, status is set to unhealthy");
+                ThreadInfo[] threadInfos = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+                String dump = Arrays.stream(threadInfos).map(ThreadInfo::toString).collect(Collectors.joining());
+                logger.debug(dump);
             }
             lastTick = minecraftServer.getNextTickTime();
         }, MAX_TICK_PERIOD, MAX_TICK_PERIOD, TimeUnit.SECONDS);
