@@ -67,8 +67,7 @@ final class ZProbeHttpServer {
     }
 
     static void start() {
-        logger.info("Starting probe http server on port " + LISTEN_PORT);
-        httpServer.setExecutor(Util.ioPool());
+        logger.info("Starting probe http server on port {}", LISTEN_PORT);
         httpServer.start();
     }
 
