@@ -34,7 +34,7 @@ steps:
   # Execute gradle build tasks
 
   - name: build-nightly
-    image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
+    image: mcr.microsoft.com/openjdk/jdk:25-ubuntu
     pull: if-not-exists
     commands:
       - ./gradlew build --info --no-daemon
