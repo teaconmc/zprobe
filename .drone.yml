@@ -50,7 +50,7 @@ steps:
   # Publish
 
   - name: publish
-    image: mcr.microsoft.com/openjdk/jdk:21-ubuntu
+    image: mcr.microsoft.com/openjdk/jdk:25-ubuntu
     pull: if-not-exists
     environment:
       GITEA_TOKEN:
@@ -103,4 +103,4 @@ volumes:
     temp: {}
 
 node:
-  mainland: "true"
+  mainland: "false"
